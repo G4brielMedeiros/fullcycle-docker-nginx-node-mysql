@@ -1,0 +1,43 @@
+version: '3'
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+
+  nginx:
+    image: g4brielmedeiros/nginx-hello
+    container_name: nginx
+    build:
+      context: ./nginx
+    networks:
+      - app-network
+    ports:
+      - "8080:80"
+
+  db:
+    image: mysql:latest
+    container_name: db
+    command: --authentication_policy=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+    networks:
+      - app-network
+    volumes:
+      - ./db:/var/lib/mysql
+
+  node:
+    image: g4brielmedeiros/node-hello
+    container_name: app
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh
+    command: node app.js
+    build:
+      context: ./node
+    depends_on:
+      - db
+    networks:
+      - app-network
+    volumes:
+      - ./node:/usr/src/app
