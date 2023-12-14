@@ -7,14 +7,13 @@ networks:
 services:
 
   nginx:
-    image: g4brielmedeiros/nginx-hello
     container_name: nginx
     build:
       context: ./nginx
     networks:
       - app-network
     ports:
-      - "8090:80"
+      - "8080:80"
 
   db:
     image: mysql:latest
@@ -29,7 +28,6 @@ services:
       - ./db:/var/lib/mysql
 
   node:
-    image: g4brielmedeiros/node-hello
     container_name: app
     entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh
     command: bash -c "npm install && node app.js"
